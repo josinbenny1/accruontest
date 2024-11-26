@@ -50,7 +50,6 @@ def salaryslip_overtime(doc, method):
             "salary_component": "Normal OT",
             "amount": total_not_amount
         })
-
     basic_row = next((e for e in doc.earnings if e.salary_component == "Basic"), None)
     if basic_row:
         basic_row.amount = (doc.custom_normal_hours or 0) * (doc.hour_rate or 0)
