@@ -43,8 +43,8 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Salary Slip" : "public/js/salary_slip.js",
-              "Timesheet":"public/js/timesheet.js"}
+# doctype_js = {"Salary Slip" : "public/js/salary_slip.js",
+#               "Timesheet":"public/js/timesheet.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -138,13 +138,15 @@ doctype_js = {"Salary Slip" : "public/js/salary_slip.js",
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
+doc_events = {
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 # 	}
-# }
+    "Timesheet":{"before_save":"accruon_custom_app.api.timesheet_overtime"},
+    "Salary Slip":{"before_save":"accruon_custom_app.api.salaryslip_overtime"}
+}
 
 # Scheduled Tasks
 # ---------------
