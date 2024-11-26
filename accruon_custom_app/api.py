@@ -1,4 +1,5 @@
 import frappe
+import frappe.defaults
 from frappe.utils import flt
 from frappe.utils.data import getdate
 from frappe import _
@@ -7,8 +8,9 @@ from frappe import _
 @frappe.whitelist()
 def is_holiday(date):
     date = frappe.utils.getdate(date)
-
-    holidays = frappe.get_doc("Holiday List", "india")
+    company = frappe.defaults.get_defaults("Company")
+    holiday_list = frappe.get_doc("Company",company.company).default_holiday_list
+    holidays = frappe.get_doc("Holiday List", holiday_list)
     holiday_dates = [frappe.utils.getdate(h.holiday_date) for h in holidays.holidays]
     return date in holiday_dates
 
@@ -17,8 +19,6 @@ def is_holiday(date):
 
 
 def salaryslip_overtime(doc, method):
-    # if not hasattr(doc, "_is_adjusted") or not doc._is_adjusted:
-    print("Hi****************************************************************************************************")
     total_hot = 0
     total_not = 0
     for row in doc.timesheets:
@@ -58,7 +58,8 @@ def salaryslip_overtime(doc, method):
 
 
 def timesheet_overtime(doc, method):
-    standard_hours = 8
+    hrs = frappe.get_doc("HR Settings")
+    standard_hours = hrs.standard_working_hours
     total_ot = 0
     total_holiday_ot = 0
 
