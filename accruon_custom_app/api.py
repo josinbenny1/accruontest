@@ -76,12 +76,11 @@ def timesheet_overtime(doc, method):
 
     for row in doc.time_logs:
         holiday = is_holiday(getdate(row.from_time))
-        if row.hours > standard_hours:
-            overtime = row.hours - standard_hours
-
-            if holiday:
-                total_holiday_ot += row.hours
-            else:
+        if holiday:
+            total_holiday_ot += row.hours
+        else:
+            if row.hours > standard_hours:
+                overtime = row.hours - standard_hours
                 total_ot += overtime
 
     doc.custom_total_not = flt(total_ot)
