@@ -59,6 +59,9 @@ def salaryslip_overtime(doc, method):
             "amount": (doc.total_working_hours or 0) * (doc.hour_rate or 0)
         })
 
+    gross_amt = total_not_amount + total_hot_amount + ((doc.custom_normal_hours or 0) * (doc.hour_rate or 0))
+    doc.gross_pay = gross_amt
+
         # doc._is_adjusted = True
 
 
