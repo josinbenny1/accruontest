@@ -86,6 +86,6 @@ def timesheet_overtime(doc, method):
 
     doc.custom_total_not = flt(total_ot)
     doc.custom_total_hot = flt(total_holiday_ot)
-    doc.db_update()
+
     
 
