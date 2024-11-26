@@ -12,7 +12,6 @@ def is_holiday(date):
     holiday_list = frappe.get_doc("Company",company.company)
     holidays = frappe.get_doc("Holiday List", holiday_list.default_holiday_list)
     holiday_dates = [frappe.utils.getdate(h.holiday_date) for h in holidays.holidays]
-    frappe.msgprint(holiday_list.default_holiday_list)
     return date in holiday_dates
 
 
@@ -32,15 +31,24 @@ def salaryslip_overtime(doc, method):
     doc.custom_not_hour_rate = (doc.hour_rate or 0) * 1.25
     doc.custom_hot_hour_rate = (doc.hour_rate or 0) * 1.5
 
-    total_amount = (total_not * doc.custom_not_hour_rate) + (total_hot * doc.custom_hot_hour_rate)
+    total_not_amount = (total_not * doc.custom_not_hour_rate)
+    total_hot_amount = (total_hot * doc.custom_hot_hour_rate)
 
-    ot_row = next((e for e in doc.earnings if e.salary_component == "OT"), None)
-    if ot_row:
-        ot_row.amount = total_amount
+    hot_row = next((e for e in doc.earnings if e.salary_component == "Holiday OT"), None)
+    if hot_row:
+        hot_row.amount = total_hot_amount
     else:
         doc.append("earnings", {
-            "salary_component": "OT",
-            "amount": total_amount
+            "salary_component": "Holiday OT",
+            "amount": total_hot_amount
+        })
+    not_row = next((e for e in doc.earnings if e.salary_component == "Normal OT"), None)
+    if not_row:
+        not_row.amount = total_not_amount
+    else:
+        doc.append("earnings", {
+            "salary_component": "Normal OT",
+            "amount": total_not_amount
         })
 
     basic_row = next((e for e in doc.earnings if e.salary_component == "Basic"), None)
@@ -68,8 +76,7 @@ def timesheet_overtime(doc, method):
         frappe.throw(_("No time logs found."))
 
     for row in doc.time_logs:
-        holiday = is_holiday(row.from_time)
-        
+        holiday = is_holiday(getdate(row.from_time))
         if row.hours > standard_hours:
             overtime = row.hours - standard_hours
 
