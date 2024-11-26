@@ -9,9 +9,10 @@ from frappe import _
 def is_holiday(date):
     date = frappe.utils.getdate(date)
     company = frappe.defaults.get_defaults("Company")
-    holiday_list = frappe.get_doc("Company",company.company).default_holiday_list
-    holidays = frappe.get_doc("Holiday List", holiday_list)
+    holiday_list = frappe.get_doc("Company",company.company)
+    holidays = frappe.get_doc("Holiday List", holiday_list.default_holiday_list)
     holiday_dates = [frappe.utils.getdate(h.holiday_date) for h in holidays.holidays]
+    frappe.msgprint(holiday_list.default_holiday_list)
     return date in holiday_dates
 
 
