@@ -175,7 +175,7 @@ def get_data(filters):
     
     if filters.get("date"):
         month = month_find(filters.get("date"))
-        year = filters.get("year")
+        year = filters.get("year") if filters.get("year") else (frappe.datetime.get_today().split("-")[0])
         print("month,",month)
         # date = 
         date = format_date(f"{year}-{month}-15")
