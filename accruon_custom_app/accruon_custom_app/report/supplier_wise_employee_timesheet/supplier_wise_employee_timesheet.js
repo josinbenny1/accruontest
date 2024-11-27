@@ -10,10 +10,18 @@ frappe.query_reports["Supplier wise Employee Timesheet"] = {
 			"options":"Supplier"
 		},
 		{
+			"fieldname": "year",
+			"fieldtype": "Select",
+			"label": "Year",
+			"options": [],
+			"default": frappe.datetime.get_today().split("-")[0]  
+		},
+		
+		{
 			"fieldname":"date",
-			"fieldtype":"Date",
-			"label":"Date",
-			"default":"Today"	
+			"fieldtype":"Select",
+			"label":"Month",
+			"options":['January',"February","March","April","May","June","July","August","September","October","November","December"]	
 		},
 		{
 			"fieldname":"summary",
@@ -24,6 +32,16 @@ frappe.query_reports["Supplier wise Employee Timesheet"] = {
 
 
 	],
+	onload: function (report) {
+        let currentYear = new Date().getFullYear();
+        let yearOptions = [];
+        for (let year = 2000; year <= currentYear; year++) {
+            yearOptions.push(year.toString());
+        }
+
+        report.page.fields_dict.year.df.options = yearOptions.join("\n");
+        report.page.fields_dict.year.refresh();
+    },
 	
 	"formatter": function (value, row, column, data, default_formatter) {
         let formatted_value = default_formatter(value, row, column, data);
