@@ -197,12 +197,6 @@ def get_data(filters):
                 for day in range(1, no_of_days + 1):
                     data[timesheet.employee][str(day)] = 0.0
             
-            data[timesheet.employee]['not'] += timesheet.custom_total_not
-            data[timesheet.employee]['hot'] += timesheet.custom_total_hot
-            data[timesheet.employee]['normal_hours'] += (
-                timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
-            )
-            data[timesheet.employee]['total_hours'] += timesheet.total_hours
             
             previous_day = add_days(first_day, -1)
             time_logs = frappe.get_all(
@@ -213,6 +207,13 @@ def get_data(filters):
                 },
                 fields=["hours", "from_time"]
             )
+            if time_logs:
+                data[timesheet.employee]['not'] += timesheet.custom_total_not
+                data[timesheet.employee]['hot'] += timesheet.custom_total_hot
+                data[timesheet.employee]['normal_hours'] += (
+                        timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
+                    )
+                data[timesheet.employee]['total_hours'] += timesheet.total_hours
             
             for log in time_logs:
                 log_date = log["from_time"].date()
