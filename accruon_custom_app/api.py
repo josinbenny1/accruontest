@@ -1,6 +1,7 @@
 import frappe
 import frappe.defaults
 from frappe.utils import flt
+import frappe.utils
 from frappe.utils.data import getdate
 from frappe import _
 
@@ -108,3 +109,7 @@ def make_attendance(doc,event):
             }).insert()
             newdoc.submit()
     
+
+
+def test():
+    print(frappe.utils.today())

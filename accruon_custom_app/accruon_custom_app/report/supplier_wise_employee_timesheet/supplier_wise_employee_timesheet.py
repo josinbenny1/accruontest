@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import get_last_day,format_date,date_diff,get_first_day,add_days,get_datetime
+from frappe.utils import get_last_day,format_date,date_diff,get_first_day,add_days,get_datetime,today
 from accruon_custom_app.api import month_find
 
 
@@ -175,8 +175,7 @@ def get_data(filters):
     
     if filters.get("date"):
         month = month_find(filters.get("date"))
-        year = filters.get("year") if filters.get("year") else (frappe.datetime.get_today().split("-")[0])
-        print("month,",month)
+        year = filters.get("year") if filters.get("year") else (frappe.today().split("-")[0])
         # date = 
         date = format_date(f"{year}-{month}-15")
         
