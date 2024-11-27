@@ -15,35 +15,108 @@ def execute(filters=None):
 
 
 
+# def get_columns(filters):
+# 	columns =  [
+# 		{
+# 		'fieldname':'employee',
+# 		'label':_('Employee'),
+# 		'fieldtype':'Link',
+# 		'options':'Employee',
+# 		'width':300
+# 		}
+# 	]
+# 	if filters.get("date"):
+# 		date = format_date(filters.get("date"))
+# 		first_day = get_first_day(date)
+# 		last_day = get_last_day(date)
+# 		no_of_days = date_diff(last_day,first_day) + 1
+# 		for i in range(1,no_of_days+1):
+# 			row = {
+# 					'fieldname':str(i),
+# 					'label':_(str(i)),
+# 					'fieldtype':'float',
+# 				}
+# 			columns.append(row)
+#     ot = [
+#             {
+#                 'fieldname':'not',
+#                 'label':_('N OT'),
+#                 'fieldtype':'float',
+#             },
+#             {
+#                 'fieldname':'hot',
+#                 'label':_('H OT'),
+#                 'fieldtype':'float',
+#             }
+#     ]
+#     columns.extend(ot)
+
+# 	return columns
+
 def get_columns(filters):
-	columns =  [
-		{
-		'fieldname':'employee',
-		'label':_('Employee'),
-		'fieldtype':'Link',
-		'options':'Employee',
-		'width':300
-		}
-	]
-	if filters.get("date"):
-		date = format_date(filters.get("date"))
-		first_day = get_first_day(date)
-		last_day = get_last_day(date)
-		no_of_days = date_diff(last_day,first_day) + 1
-		for i in range(1,no_of_days+1):
-			row = {
-					'fieldname':str(i),
-					'label':_(str(i)),
-					'fieldtype':'int',
-				}
-			columns.append(row)
-	return columns
+    columns = [
+        {
+            'fieldname': 'employee',
+            'label': _('Employee'),
+            'fieldtype': 'Link',
+            'options': 'Employee',
+            'width': 300
+        }
+    ]
+    if not filters.get('summary'):
+        print(filters.get('summary'))
+        if filters.get("date"):
+            date = format_date(filters.get("date"))
+            first_day = get_first_day(date)
+            last_day = get_last_day(date)
+            no_of_days = date_diff(last_day, first_day) + 1
+            for i in range(1, no_of_days + 1):
+                row = {
+                    'fieldname': str(i),
+                    'label': _(str(i)),
+                    'fieldtype': 'Float',
+                    'width':50
+                }
+                columns.append(row)
+    ot = [
+        {
+            'fieldname': 'empty',
+            'label': _(''),
+            'fieldtype': 'data',
+        },
+        {
+            'fieldname': 'not',
+            'label': _('N OT'),
+            'fieldtype': 'Float',
+        },
+        {
+            'fieldname': 'hot',
+            'label': _('H OT'),
+            'fieldtype': 'Float',
+        },
+        {
+            'fieldname':'normal_hours',
+            'label':_('Normal Hours'),
+            'fieldtype':'float'
+        },
+        {
+            'fieldname':'total_hours',
+            'label':_('Total Hours'),
+            'fieldtype':'float'
+        }
+    ]
+    columns.extend(ot)
+
+    return columns
+
+
+
 
 def get_data(filters):
     timesheets = frappe.get_all(
         "Timesheet",
         filters={"docstatus": 1},
-        fields=["name", "employee", "creation"]
+        fields=["name", "employee", "creation","custom_total_not","custom_total_hot","total_hours"]
     )
     suppliers_timesheets = []
     data = []
@@ -78,10 +151,17 @@ def get_data(filters):
 
             time_logs = frappe.get_all(
                 "Timesheet Detail",
-                filters={"parent": timesheet.name},
-                fields=["hours", "from_time"]
+                filters = {"parent": timesheet.name},
+                fields = ["hours", "from_time"]
             )
-
+            row['not'] = 0
+            row['hot'] = 0
+            row['normal_hours'] = 0
+            row['total_hours'] = 0
+            row['not'] += timesheet.custom_total_not
+            row['hot'] += timesheet.custom_total_hot
+            row['normal_hours'] += timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
+            row['total_hours'] += timesheet.total_hours
             for log in time_logs:
                 log_date = log.from_time.date() 
                 day_number = (log_date - first_day).days + 1
