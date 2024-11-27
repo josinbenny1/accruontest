@@ -15,45 +15,6 @@ def execute(filters=None):
 
 
 
-
-# def get_columns(filters):
-# 	columns =  [
-# 		{
-# 		'fieldname':'employee',
-# 		'label':_('Employee'),
-# 		'fieldtype':'Link',
-# 		'options':'Employee',
-# 		'width':300
-# 		}
-# 	]
-# 	if filters.get("date"):
-# 		date = format_date(filters.get("date"))
-# 		first_day = get_first_day(date)
-# 		last_day = get_last_day(date)
-# 		no_of_days = date_diff(last_day,first_day) + 1
-# 		for i in range(1,no_of_days+1):
-# 			row = {
-# 					'fieldname':str(i),
-# 					'label':_(str(i)),
-# 					'fieldtype':'float',
-# 				}
-# 			columns.append(row)
-#     ot = [
-#             {
-#                 'fieldname':'not',
-#                 'label':_('N OT'),
-#                 'fieldtype':'float',
-#             },
-#             {
-#                 'fieldname':'hot',
-#                 'label':_('H OT'),
-#                 'fieldtype':'float',
-#             }
-#     ]
-#     columns.extend(ot)
-
-# 	return columns
-
 def get_columns(filters):
     columns = [
         {
@@ -61,7 +22,14 @@ def get_columns(filters):
             'label': _('Employee'),
             'fieldtype': 'Link',
             'options': 'Employee',
-            'width': 300
+            'width': 250
+        },
+        {
+            'fieldname': 'supplier',
+            'label': _('Supplier'),
+            'fieldtype': 'Link',
+            'options': 'Supplier',
+            'width': 150
         }
     ]
     if not filters.get('summary'):
@@ -215,11 +183,12 @@ def get_data(filters):
         first_day = get_first_day(date)
         last_day = get_last_day(date)
         no_of_days = date_diff(last_day, first_day) + 1
-        print(first_day)
         for timesheet in suppliers_timesheets:
             if timesheet.employee not in data:
+                emp = frappe.get_doc("Employee",timesheet.employee)
                 data[timesheet.employee] = {
                     'employee': timesheet.employee,
+                    'supplier':emp.custom_supplier,
                     'not': 0,
                     'hot': 0,
                     'normal_hours': 0,

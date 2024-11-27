@@ -144,7 +144,8 @@ doc_events = {
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 # 	}
-    "Timesheet":{"validate":"accruon_custom_app.api.timesheet_overtime"},
+    "Timesheet":{"validate":"accruon_custom_app.api.timesheet_overtime",
+                 "on_submit":"accruon_custom_app.api.make_attendance"},
     "Salary Slip":{"validate":"accruon_custom_app.api.salaryslip_overtime"}
 }
 

@@ -95,4 +95,16 @@ def timesheet_overtime(doc, method):
 def month_find(month):
     months =  {'January':1,"February":2,"March":3,"April":4,"May":5,"June":6,"July":7,"August":8,"September":9,"October":10,"November":11,"December":12}
     return months[month]
+
+
+def make_attendance(doc,event):
+    if doc.custom_mark_attendance == 1:
+        for t in doc.time_logs:
+            newdoc = frappe.get_doc({
+                "doctype":"Attendance",
+                "employee":doc.employee,
+                "attendance_date":t.from_time,
+                "status":"Present"
+            }).insert()
+            newdoc.submit()
     
