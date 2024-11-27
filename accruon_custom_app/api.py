@@ -22,8 +22,9 @@ def salaryslip_overtime(doc, method):
     total_hot = 0
     total_not = 0
     for row in doc.timesheets:
-        total_not += row.get("custom_total_normal_overtime", 0)
-        total_hot += row.get("custom_total_holiday_overtime", 0)
+        ts = frappe.get_doc("Timesheet",row.time_sheet)
+        total_not += ts.custom_total_not if ts.custom_total_not else 0
+        total_hot += ts.custom_total_hot if ts.custom_total_hot else 0
     doc.custom_normal_hours = (doc.total_working_hours or 0) - total_hot - total_not
 
     doc.custom_total_not = total_not

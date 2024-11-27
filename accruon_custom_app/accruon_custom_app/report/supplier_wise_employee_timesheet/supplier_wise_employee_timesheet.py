@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import get_last_day,format_date,date_diff,get_first_day
+from frappe.utils import get_last_day,format_date,date_diff,get_first_day,add_days,get_datetime
 
 
 def execute(filters=None):
@@ -148,22 +148,31 @@ def get_data(filters):
 
             for day in range(1, no_of_days + 1):
                 row[str(day)] = 0.0
-
+            previous_day = add_days(first_day, -1)
+            print(previous_day,last_day)
             time_logs = frappe.get_all(
                 "Timesheet Detail",
-                filters = {"parent": timesheet.name},
+                filters = {
+                            "parent": timesheet.name,
+                            "from_time":["between",[previous_day,last_day]]
+                           },
                 fields = ["hours", "from_time"]
             )
+
             row['not'] = 0
             row['hot'] = 0
             row['normal_hours'] = 0
             row['total_hours'] = 0
-            row['not'] += timesheet.custom_total_not
-            row['hot'] += timesheet.custom_total_hot
-            row['normal_hours'] += timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
-            row['total_hours'] += timesheet.total_hours
+            if time_logs:
+                row['not'] += timesheet.custom_total_not
+                row['hot'] += timesheet.custom_total_hot
+                row['normal_hours'] += timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
+                row['total_hours'] += timesheet.total_hours
+            else:
+                pass
             for log in time_logs:
-                log_date = log.from_time.date() 
+                print(log)
+                log_date = log["from_time"].date() 
                 day_number = (log_date - first_day).days + 1
                 if 1 <= day_number <= no_of_days:
                     row[str(day_number)] += log.hours
