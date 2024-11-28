@@ -121,8 +121,8 @@ def update_project_employee(doc,events):
             employee.save()
     if old_doc and old_doc.custom_employees:
         for oe in old_doc.custom_employees:
-            emp = frappe.get_doc("Employee",oe.employee)
             if oe.employee not in doc.custom_employees:
+                emp = frappe.get_doc("Employee",oe.employee)
                 if emp.custom_project:
                     emp.custom_project = None
                     emp.save()
