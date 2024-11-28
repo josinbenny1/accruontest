@@ -114,12 +114,11 @@ def make_attendance(doc,event):
 
 def update_project_employee(doc,events):
     old_doc = doc.get_doc_before_save()
-    if doc.custom_employees:
-        for e in doc.custom_employees:
-            employee = frappe.get_doc("Employee",e.employee)
-            if not employee.custom_project:
-                employee.custom_project = doc.name
-                employee.save()
+    for e in doc.custom_employees:
+        employee = frappe.get_doc("Employee",e.employee)
+        if not employee.custom_project:
+            employee.custom_project = doc.name
+            employee.save()
     if old_doc and old_doc.custom_employees:
         for oe in old_doc.custom_employees:
             emp = frappe.get_doc("Employee",oe.employee)
