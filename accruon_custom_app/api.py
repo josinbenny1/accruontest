@@ -111,5 +111,9 @@ def make_attendance(doc,event):
     
 
 
-def test():
-    print(frappe.utils.today())
+def update_project_employee(doc,events):
+    for e in doc.custom_employees:
+        employee = frappe.get_doc("Employee",e.employee)
+        if not employee.custom_project:
+            employee.custom_project = doc.name
+        employee.save()
