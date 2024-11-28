@@ -4,6 +4,7 @@ from frappe.utils import flt
 import frappe.utils
 from frappe.utils.data import getdate
 from frappe import _
+import time
 
 
 @frappe.whitelist()
@@ -112,8 +113,19 @@ def make_attendance(doc,event):
 
 
 def update_project_employee(doc,events):
-    for e in doc.custom_employees:
-        employee = frappe.get_doc("Employee",e.employee)
-        if not employee.custom_project:
-            employee.custom_project = doc.name
-        employee.save()
+    old_doc = doc.get_doc_before_save()
+    if doc.custom_employees:
+        for e in doc.custom_employees:
+            employee = frappe.get_doc("Employee",e.employee)
+            if not employee.custom_project:
+                employee.custom_project = doc.name
+                employee.save()
+    if old_doc and old_doc.custom_employees:
+        for oe in old_doc.custom_employees:
+            emp = frappe.get_doc("Employee",oe.employee)
+            if oe.employee not in doc.custom_employees:
+                if emp.custom_project:
+                    emp.custom_project = None
+                    emp.save()
+    
+        
