@@ -25,6 +25,12 @@ def get_columns(filters):
             'width': 250
         },
         {
+            'fieldname': 'employee_name',
+            'label': _('Employee Name'),
+            'fieldtype': 'Data',
+            'width': 250
+        },
+        {
             'fieldname': 'supplier',
             'label': _('Supplier'),
             'fieldtype': 'Link',
@@ -188,6 +194,7 @@ def get_data(filters):
                 data[timesheet.employee] = {
                     'employee': timesheet.employee,
                     'supplier':emp.custom_supplier,
+                    'employee_name':emp.employee_name,
                     'not': 0,
                     'hot': 0,
                     'normal_hours': 0,

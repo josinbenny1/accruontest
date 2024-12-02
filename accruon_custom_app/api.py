@@ -64,6 +64,7 @@ def salaryslip_overtime(doc, method):
 
     gross_amt = total_not_amount + total_hot_amount + ((doc.custom_normal_hours or 0) * (doc.hour_rate or 0))
     doc.gross_pay = gross_amt
+    doc.net_pay = doc.gross_pay - doc.total_deduction
 
         # doc._is_adjusted = True
 
@@ -112,19 +113,41 @@ def make_attendance(doc,event):
     
 
 
+# def update_project_employee(doc,events):
+#     old_doc = doc.get_doc_before_save()
+#     for e in doc.custom_employees:
+#         employee = frappe.get_doc("Employee",e.employee)
+#         if not employee.custom_project:
+#             employee.custom_project = doc.name
+#             employee.save()
+#     if old_doc and old_doc.custom_employees:
+#         print(doc.custom_employees)
+#         for oe in old_doc.custom_employees:
+#             if oe.employee not in doc.custom_employees:
+#                 emp = frappe.get_doc("Employee",oe.employee)
+#                 if emp.custom_project:
+#                     emp.custom_project = None
+#                     emp.save()
+
+
+def for_test():
+    doc = frappe.get_doc("Project","PROJ-0004")
+    update_project_employee(doc,None)
+
 def update_project_employee(doc,events):
+    old_emps = []
     old_doc = doc.get_doc_before_save()
     for e in doc.custom_employees:
         employee = frappe.get_doc("Employee",e.employee)
+        old_emps.append(e.employee)
         if not employee.custom_project:
             employee.custom_project = doc.name
             employee.save()
     if old_doc and old_doc.custom_employees:
         for oe in old_doc.custom_employees:
-            if oe.employee not in doc.custom_employees:
+            if oe.employee not in old_emps:
                 emp = frappe.get_doc("Employee",oe.employee)
                 if emp.custom_project:
                     emp.custom_project = None
                     emp.save()
-    
         

@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/accruon_custom_app/css/accruon_custom_app.css"
-# app_include_js = "/assets/accruon_custom_app/js/accruon_custom_app.js"
+app_include_js = "/assets/accruon_custom_app/js/accruon_custom_app.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/accruon_custom_app/css/accruon_custom_app.css"
@@ -57,7 +57,7 @@ doctype_js = {"Project" : "public/js/project.js"}
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "aura-hr"
 
 # website user home page (by Role)
 # role_home_page = {
@@ -146,7 +146,7 @@ doc_events = {
     "Timesheet":{"validate":"accruon_custom_app.api.timesheet_overtime",
                  "on_submit":"accruon_custom_app.api.make_attendance"},
     "Salary Slip":{"validate":"accruon_custom_app.api.salaryslip_overtime"},
-    "Project":{"validate":"accruon_custom_app.api.update_project_employee"}
+    "Project":{"before_save":"accruon_custom_app.api.update_project_employee"}
 }
 
 # Scheduled Tasks
