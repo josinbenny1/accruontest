@@ -246,3 +246,13 @@ doc_events = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+fixtures = [{
+               "dt":"Property Setter",
+               "filters":[
+                   [
+                       "name", "in", [
+                           "Project-custom_employees-allow_bulk_edit"
+                       ]
+                   ]
+               ]
+           }]
