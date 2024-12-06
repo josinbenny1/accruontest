@@ -113,21 +113,6 @@ def make_attendance(doc,event):
     
 
 
-# def update_project_employee(doc,events):
-#     old_doc = doc.get_doc_before_save()
-#     for e in doc.custom_employees:
-#         employee = frappe.get_doc("Employee",e.employee)
-#         if not employee.custom_project:
-#             employee.custom_project = doc.name
-#             employee.save()
-#     if old_doc and old_doc.custom_employees:
-#         print(doc.custom_employees)
-#         for oe in old_doc.custom_employees:
-#             if oe.employee not in doc.custom_employees:
-#                 emp = frappe.get_doc("Employee",oe.employee)
-#                 if emp.custom_project:
-#                     emp.custom_project = None
-#                     emp.save()
 
 
 def for_test():
@@ -142,12 +127,36 @@ def update_project_employee(doc,events):
         old_emps.append(e.employee)
         if not employee.custom_project:
             employee.custom_project = doc.name
-            employee.save()
+        employee.custom_billing_rate = e.billing_price
+        employee.custom_costing_rate = e.costing_price
+        employee.custom_activity = e.activity
+        employee.save()
+        update_activity_cost(employee)
     if old_doc and old_doc.custom_employees:
         for oe in old_doc.custom_employees:
             if oe.employee not in old_emps:
                 emp = frappe.get_doc("Employee",oe.employee)
                 if emp.custom_project:
                     emp.custom_project = None
+                    emp.custom_billing_rate = None
+                    emp.custom_costing_rate = None
                     emp.save()
         
+def update_activity_cost(employee):
+    activity_cost = frappe.get_all("Activity Cost",filters = {"employee":employee.name},fields=["billing_rate","costing_rate","employee","name","activity_type"])
+    if activity_cost and activity_cost[0].activity_type == employee.custom_activity:
+        print("njanjanjajna",activity_cost[0].billing_rate)
+        if activity_cost[0].billing_rate != employee.custom_billing_rate or activity_cost[0].costing_rate != employee.custom_costing_rate:
+            ac = frappe.get_doc("Activity Cost",activity_cost[0].name)
+            ac.billing_rate = employee.custom_billing_rate
+            ac.costing_rate = employee.custom_costing_rate
+            ac.save()
+    else:
+        newdoc = frappe.get_doc({
+            "doctype":"Activity Cost",
+            "employee":employee.name,
+            "billing_rate":employee.custom_billing_rate,
+            "costing_rate":employee.custom_costing_rate,
+            "activity_type":employee.custom_activity
+            })
+        newdoc.insert()

@@ -39,9 +39,10 @@ def get_columns(filters):
         }
     ]
     if not filters.get('summary'):
-        print(filters.get('summary'))
         if filters.get("date"):
-            date = format_date(filters.get("date"))
+            month = month_find(filters.get("date"))
+            year = filters.get("year") if filters.get("year") else (today().split("-")[0])
+            date = format_date(f"{year}-{month}-15")            
             first_day = get_first_day(date)
             last_day = get_last_day(date)
             no_of_days = date_diff(last_day, first_day) + 1
@@ -86,75 +87,6 @@ def get_columns(filters):
 
 
 
-
-# def get_data(filters):
-#     timesheets = frappe.get_all(
-#         "Timesheet",
-#         filters={"docstatus": 1},
-#         fields=["name", "employee", "creation","custom_total_not","custom_total_hot","total_hours"]
-#     )
-#     suppliers_timesheets = []
-#     data = []
-
-#     if filters.get("supplier"):
-#         employees = frappe.get_all(
-#             "Employee",
-#             filters={"custom_supplier": filters.get("supplier")},
-#             fields=["name"]
-#         )
-#         employee_names = {e.name for e in employees}
-
-#         suppliers_timesheets = [
-#             t for t in timesheets if t.employee in employee_names
-#         ]
-#     else:
-#         suppliers_timesheets = timesheets
-
-#     if filters.get("date"):
-#         date = format_date(filters.get("date"))
-#         first_day = get_first_day(date)
-#         last_day = get_last_day(date)
-#         no_of_days = date_diff(last_day, first_day) + 1
-
-#         for timesheet in suppliers_timesheets:
-#             row = {
-#                 'employee': timesheet.employee,
-#             }
-
-#             for day in range(1, no_of_days + 1):
-#                 row[str(day)] = 0.0
-#             previous_day = add_days(first_day, -1)
-#             print(previous_day,last_day)
-#             time_logs = frappe.get_all(
-#                 "Timesheet Detail",
-#                 filters = {
-#                             "parent": timesheet.name,
-#                             "from_time":["between",[previous_day,last_day]]
-#                            },
-#                 fields = ["hours", "from_time"]
-#             )
-
-#             row['not'] = 0
-#             row['hot'] = 0
-#             row['normal_hours'] = 0
-#             row['total_hours'] = 0
-#             if time_logs:
-#                 row['not'] += timesheet.custom_total_not
-#                 row['hot'] += timesheet.custom_total_hot
-#                 row['normal_hours'] += timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
-#                 row['total_hours'] += timesheet.total_hours
-#             else:
-#                 pass
-#             for log in time_logs:
-#                 print(log)
-#                 log_date = log["from_time"].date() 
-#                 day_number = (log_date - first_day).days + 1
-#                 if 1 <= day_number <= no_of_days:
-#                     row[str(day_number)] += log.hours
-
-#             data.append(row)
-
-#     return data
 
 
 def get_data(filters):

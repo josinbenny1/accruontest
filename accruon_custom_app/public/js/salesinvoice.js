@@ -37,7 +37,8 @@ frappe.ui.form.on('Sales Invoice', {
 							to_time: data.to_time,
 							project: data.project,
 						}).then(()=>{
-                        console.log("hi")
+                            frm.set_value("custom_timesheet_from", data.from_time)
+                            frm.set_value("custom_timesheet_to", data.to_time)
                         salesInvoiceItem(frm)
                     })
 						d.hide();
@@ -53,6 +54,7 @@ frappe.ui.form.on('Sales Invoice', {
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
+        
 	},
 
 })
@@ -92,6 +94,9 @@ function salesInvoiceItem(frm) {
             console.log(items);
             addItemstoInvoice(frm, items);
         });
+    } else {
+        console.log("No Data Found")
+        frappe.dom.unfreeze()
     }
 
     
