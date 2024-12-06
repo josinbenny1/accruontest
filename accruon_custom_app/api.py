@@ -138,8 +138,6 @@ def update_project_employee(doc,events):
                 emp = frappe.get_doc("Employee",oe.employee)
                 if emp.custom_project:
                     emp.custom_project = None
-                    emp.custom_billing_rate = None
-                    emp.custom_costing_rate = None
                     emp.save()
         
 def update_activity_cost(employee):
