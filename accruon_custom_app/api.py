@@ -145,7 +145,6 @@ def update_project_employee(doc,events):
 def update_activity_cost(employee):
     activity_cost = frappe.get_all("Activity Cost",filters = {"employee":employee.name},fields=["billing_rate","costing_rate","employee","name","activity_type"])
     if activity_cost and activity_cost[0].activity_type == employee.custom_activity:
-        print("njanjanjajna",activity_cost[0].billing_rate)
         if activity_cost[0].billing_rate != employee.custom_billing_rate or activity_cost[0].costing_rate != employee.custom_costing_rate:
             ac = frappe.get_doc("Activity Cost",activity_cost[0].name)
             ac.billing_rate = employee.custom_billing_rate

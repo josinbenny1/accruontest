@@ -19,3 +19,26 @@ frappe.ui.form.on('Project', {
         });
     }
 });
+
+
+frappe.ui.form.on('Project Employee Details', {
+	employee: function(frm,cdt,cdn){
+        let row = locals[cdt][cdn];
+        if (row.employee) {
+            frappe.call({
+                method: 'frappe.client.get',
+                args: {
+                    doctype: 'Employee',
+                    name: row.employee, 
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.model.set_value(cdt, cdn, 'costing_price', r.message.custom_costing_rate);
+                        frappe.model.set_value(cdt, cdn, 'billing_price', r.message.custom_billing_rate);
+                        frappe.model.set_value(cdt, cdn, 'activity', r.message.custom_activity);
+                    }
+                }
+            });
+        }
+    }
+})
