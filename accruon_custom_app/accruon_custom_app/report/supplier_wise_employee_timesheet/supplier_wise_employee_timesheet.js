@@ -10,18 +10,21 @@ frappe.query_reports["Supplier wise Employee Timesheet"] = {
 			"options":"Supplier"
 		},
 		{
-			"fieldname": "year",
-			"fieldtype": "Select",
-			"label": "Year",
-			"options": [],
-			"default": frappe.datetime.get_today().split("-")[0]  
+			"fieldname":"project",
+			'fieldtype':"Link",
+			"label":"Project",
+			"options":"Project"
 		},
-		
 		{
-			"fieldname":"date",
-			"fieldtype":"Select",
-			"label":"Month",
-			"options":['January',"February","March","April","May","June","July","August","September","October","November","December"]	
+			"fieldname":"from_date",
+			"fieldtype":"Date",
+			"label":"FromDate"
+		},
+		{
+			"fieldname":"to_date",
+			"fieldtype":"Date",
+			"label":"To Date",
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"summary",
@@ -33,14 +36,11 @@ frappe.query_reports["Supplier wise Employee Timesheet"] = {
 
 	],
 	onload: function (report) {
-        let currentYear = new Date().getFullYear();
-        let yearOptions = [];
-        for (let year = 2000; year <= currentYear; year++) {
-            yearOptions.push(year.toString());
-        }
+        let today = new Date();
+		let previousMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+		let formattedPreviousMonthDate = frappe.datetime.obj_to_str(previousMonthDate);
 
-        report.page.fields_dict.year.df.options = yearOptions.join("\n");
-        report.page.fields_dict.year.refresh();
+		report.page.fields_dict.from_date.set_input(formattedPreviousMonthDate);
     },
 	
 	"formatter": function (value, row, column, data, default_formatter) {

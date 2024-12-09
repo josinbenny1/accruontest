@@ -30,6 +30,12 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    .vertical-align {
+        writing-mode: vertical-rl !important;  
+        text-orientation: mixed;
+    }
+
+
     
     @media print {
         body {
@@ -41,29 +47,37 @@
         }
     }
 </style>
-
+<div class="text-center" style="text-align:center;width:100px">
+<img src="/files/Screenshot from 2024-12-05 16-39-47.png"> 
+</div>
 <h2 class="text-center" style="font-size: 30px;">{%= filters.company %}</h2>
 <h2 class="text-center" style="font-size: 12px;"><b></b></h2>
  
 
 {% if 'supplier' in filters %}
-	<h3 class="text-center">Timesheet {%= filters.supplier %}</h3>
+	<h3 class="text-center">Timesheet for {%= filters.supplier %}</h3>
+{% else %}
+    <h3 class="text-center">Timesheet for All Employees</h3>
+{% endif %}
+{% if 'project' in filters %}
+	<h3 class="text-center">Project:  {%= filters.project %}</h3>
 {% endif %}
 
-<h3 class="text-center">{%= filters.year %}</h3>
-<h3 class="text-center">{%= filters.month %}</h3>
+<h5 class="text-center">Timesheet from {%= filters.from_date %} to {%= filters.to_date %}</h5>
 <table class="table table-bordered">
     <colgroup>
         <col style="width: 10%;"> 
+        <col style="width: 5%;"> 
+        <col style="width: 5%;"> 
         {% for (let i = 1, l = report_columns.length; i < l; i++) { %}
-            <col style="width: {{ 80 / (report_columns.length - 1) }}%;"> 
+            <col style="width: {{ 100 / (report_columns.length - 1) }}%;"> 
         {% } %}
     </colgroup>
 	<thead>
 		<tr>
 			{% for (let i = 1, l = report_columns.length; i < l; i++) { %}
                 {% if (report_columns[i].label != "Supplier") { %}
-				    <th class="text-right">{%= report_columns[i].label %}</th>
+				    <th class="vertical-align">{%= report_columns[i].label %}</th>
                 {% } %}
 			{% } %}
 		</tr>
