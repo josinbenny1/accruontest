@@ -9,11 +9,17 @@ from datetime import datetime
 
 
 def execute(filters=None):
-	columns, data = [], []
-	columns = get_columns(filters)
-	data = get_data(filters)
-	return columns, data
+    if filters.get("project"):
+        project_name = frappe.get_value("Project", filters.get("project"), "project_name")
 
+        filters["project_name"] = project_name
+    
+    columns, data = [], []
+    columns = get_columns(filters)
+    data = get_data(filters)
+    
+    
+    return columns, data
 
 
 def get_columns(filters):
@@ -60,7 +66,6 @@ def get_columns(filters):
             no_of_days = date_diff(last_day, first_day) + 1
             for i in range(1, no_of_days + 1):
                 date_label = add_days(first_day,i-1)
-                print(date_label)
                 row = {
                     'fieldname': str(i),
                     'label': f"{date_label}",
@@ -109,6 +114,7 @@ def get_data(filters):
         filters={"docstatus": 1},
         fields=["name", "employee", "creation", "custom_total_not", "custom_total_hot", "total_hours"]
     )
+   
     suppliers_timesheets = []
     data = {}
     filter = get_conditions(filters)
@@ -137,12 +143,14 @@ def get_data(filters):
                     supplier = emp.custom_supplier
                 else:
                     supplier = ""
+                if emp.custom_project:
+                    project = frappe.get_value("Project",emp.custom_project,"project_name")
                 data[timesheet.employee] = {
                     'employee': timesheet.employee,
                     'supplier':supplier,
                     'employee_name':emp.employee_name,
                     'employee_type':emp.custom_employee_type,
-                    'project':emp.custom_project,
+                    'project':project,
                     'not': 0,
                     'hot': 0,
                     'normal_hours': 0,

@@ -7,6 +7,7 @@
 	}
 %}
 
+
 <style>
 	.financial-statements-important td {
 		font-weight: bold;
@@ -57,40 +58,39 @@
 {% if 'supplier' in filters %}
 	<h3 class="text-center">Timesheet for {%= filters.supplier %}</h3>
 {% else %}
-    <h3 class="text-center">Timesheet for All Employees</h3>
-{% endif %}
-{% if 'project' in filters %}
-	<h3 class="text-center">Project:  {%= filters.project %}</h3>
+    <h3 class="text-center">Timesheet</h3>
 {% endif %}
 
+
 <h5 class="text-center">Timesheet from {%= filters.from_date %} to {%= filters.to_date %}</h5>
-<table class="table table-bordered">
+<table class="table table-bordered border-black">
     <colgroup>
         <col style="width: 10%;"> 
-        <col style="width: 5%;"> 
-        <col style="width: 5%;"> 
+        <col style="width: 10%;"> 
         {% for (let i = 1, l = report_columns.length; i < l; i++) { %}
             <col style="width: {{ 100 / (report_columns.length - 1) }}%;"> 
         {% } %}
     </colgroup>
-	<thead>
-		<tr>
-			{% for (let i = 1, l = report_columns.length; i < l; i++) { %}
-                {% if (report_columns[i].label != "Supplier") { %}
-				    <th class="vertical-align">{%= report_columns[i].label %}</th>
+    <thead>
+        <tr>
+            {% for (let i = 1, l = report_columns.length; i < l; i++) { %}
+                {% if (report_columns[i].label != "Supplier" && report_columns[i].label != "Emp Type") { %}
+                    {% if (report_columns[i].label == "Employee Name" || report_columns[i].label == "Project") { %}
+                    <th class="text-center horizontal-align" style="width:auto; border: 1px solid #000000;">{%= report_columns[i].label %}</th>
+                    {% } else if (report_columns[i].label != "Employee Name" || report_columns[i].label != "Project") { %}
+                    <th class="text-center vertical-align" style="width:auto; border: 1px solid #000000;">{%= report_columns[i].label %}</th>
+                    {% } %}
                 {% } %}
-			{% } %}
-		</tr>
-	</thead>
-	<tbody>
+            {% } %}
+        </tr>
+    </thead>
+    <tbody>
         {% for (let j = 0, k = data.length; j < k; j++) { %}
-            {%
-                var row = data[j];
-            %}
+            {% var row = data[j]; %}
             <tr>
-                <td style="width:auto;"><span>{%= row.employee_name %}</span></td>
-                {% for (let i = 3, l = report_columns.length; i < l; i++) { %}
-                    <td class="text-right">
+                <td style="width:auto; border: 1px solid #000000;"><span>{%= row.employee_name %}</span></td>
+                {% for (let i = 4, l = report_columns.length; i < l; i++) { %}
+                    <td class="text-right" style="width:auto; border: 1px solid #000000;">
                         {% const fieldname = report_columns[i].fieldname; %}
                         {% if (!is_null(row[fieldname])) { %}
                             {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
@@ -101,6 +101,8 @@
         {% } %}
     </tbody>
 </table>
+
+
 <p class="text-right text-muted">
 	Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}
 </p>
