@@ -58,7 +58,7 @@ doctype_js = {"Project" : "public/js/project.js",
 # ----------
 
 # application home page (will override Website Settings)
-home_page = "aura-hr"
+# home_page = "aura-hr"
 
 # website user home page (by Role)
 # role_home_page = {
