@@ -5,6 +5,7 @@ import frappe.utils
 from frappe.utils.data import getdate
 from frappe import _
 import time
+import json
 
 
 @frappe.whitelist()
@@ -157,3 +158,29 @@ def update_activity_cost(employee):
             "activity_type":employee.custom_activity
             })
         newdoc.insert()
+
+
+
+@frappe.whitelist()
+def get_rates(data,project):
+    data = json.loads(data)
+    ts = frappe.get_doc("Timesheet", data["time_sheet"])
+    emp = ts.employee
+    work_hours = frappe.get_value("Project", project, "custom_standard_working_hours")
+
+    project_data = frappe.db.sql(f"""SELECT 
+                                    costing_price,
+                                    billing_price,
+                                    ot_rate 
+                                 FROM 
+                                    `tabProject Employee Details` 
+                                 WHERE 
+                                    parent = "{project}" 
+                                AND 
+                                    employee = "{emp}";
+                                """,as_dict=True)
+    project_data[0]["work_hours"] = work_hours
+    project_data[0]["not"] = ts.custom_total_not
+    project_data[0]["hot"] = ts.custom_total_hot
+    project_data[0]["normal_hours"] = ts.total_hours - ts.custom_total_not or 0 - ts.custom_total_hot or 0
+    return project_data

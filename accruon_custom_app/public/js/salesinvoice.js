@@ -61,62 +61,83 @@ frappe.ui.form.on('Sales Invoice', {
 
 
 
-
-function salesInvoiceItem(frm) {
+async function salesInvoiceItem(frm) {
     const items = {};
     frm.set_value('items', []);
-    frappe.dom.freeze("Please wait..")
+    frappe.dom.freeze("Please wait..");
 
-    if (frm.doc.timesheets && frm.doc.timesheets.length > 0){
-        const promises = frm.doc.timesheets.map((row) => {
-            return frappe.db.get_value("Activity Type", { name: row.activity_type }, "custom_item")
-                .then((response) => {
-                    const item = response.message?.custom_item;
+    if (frm.doc.timesheets && frm.doc.timesheets.length > 0) {
+        const promises = frm.doc.timesheets.map(async (row) => {
+            try {
+                const response = await frappe.db.get_value("Activity Type", { name: row.activity_type }, "custom_item");
+                const item = response.message?.custom_item;
+                console.log("1 works");
 
-                    if (item) {
-                        if (items[item]) {
-                            items[item].qty += row.billing_hours;
-                            items[item].rate = (items[item].rate + (row.billing_amount / row.billing_hours)) / 2;
-                        } else {
-                            items[item] = {
-                                item_code: item,
-                                rate: row.billing_amount / row.billing_hours,
-                                qty: row.billing_hours
-                            };
+                if (item) {
+                    const rates = await frappe.call({
+                        method: "accruon_custom_app.api.get_rates",
+                        args: {
+                            "data": row,
+                            "project": frm.doc.project
                         }
-                    }
-                })
-                .catch((error) => {
-                    console.error(`Error fetching custom_item for Activity Type: ${row.activity_type}`, error);
-                });
-        });
-        Promise.all(promises).then(() => {
-            console.log(items);
-            addItemstoInvoice(frm, items);
-        });
-    } else {
-        console.log("No Data Found")
-        frappe.dom.unfreeze()
-    }
+                    });
 
-    
+                    let data = rates.message[0];
+                    if (items[item]) {
+                        items[item].qty += row.billing_hours;
+                        items[item].rate = (items[item].rate + (row.billing_amount / row.billing_hours)) / 2;
+                        items[item].not += data.not;
+                        items[item].hot += data.hot;
+                        items[item].normal_hours += data.normal_hours;
+                        items[item].ot_rate = data.ot_rate;
+                        items[item].normal_rate = data.billing_price;
+                    } else {
+                        items[item] = {
+                            item_code: item,
+                            rate: row.billing_amount / row.billing_hours,
+                            qty: row.billing_hours,
+                            not: data.not,
+                            hot: data.hot,
+                            normal_hours: data.normal_hours,
+                            ot_rate: data.ot_rate,
+                            normal_rate: data.billing_price
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error(`Error fetching custom_item for Activity Type: ${row.activity_type}`, error);
+            }
+        });
+
+        await Promise.all(promises);
+        addItemstoInvoice(frm, items);
+        console.log("2 works");
+
+    } else {
+        frappe.dom.unfreeze();
+    }
 }
 
 
 
 function addItemstoInvoice(frm, items) {
-    console.log("Adding items to invoice...");
+    
     if (frm.doc.items && frm.doc.items.length > 1){
 
         } else {
         for (const item in items) {
             const child = frm.add_child("items");
             child.item_code = items[item].item_code;
-            child.rate = items[item].rate;
-            child.qty = items[item].qty;
+            child.rate = (((items[item].not)*(items[item].ot_rate * 1.25))+((items[item].hot)*(items[item].ot_rate * 1.5))+((items[item].normal_hours)*(items[item].normal_rate)));
+            child.qty = 1;
             child.uom = "Hour";
             child.item_name = items[item].item_code;
-            console.log("Child item added:", child);
+            child.custom_total_not = items[item].not;
+            child.custom_total_hot = items[item].hot;
+            child.custom_normal_hours = items[item].normal_hours;
+            child.custom_not_rate = (items[item].ot_rate * 1.25);
+            child.custom_hot_rate = (items[item].ot_rate * 1.5);
+            child.custom_normal_rate = (items[item].normal_rate);
             
         }
     frm.refresh_field("items");

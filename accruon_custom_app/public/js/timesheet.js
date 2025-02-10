@@ -3,7 +3,7 @@ frappe.ui.form.on('Timesheet', {
         console.log("Code working for ts")
     },
     validate: function (frm) {
-        const standard_hours = 8;
+        const standard_hours = 10;
         let total_ot = 0;
         let total_holiday_ot = 0;
         let completed_requests = 0;

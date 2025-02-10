@@ -10,7 +10,8 @@
   "employee_name",
   "activity",
   "costing_price",
-  "billing_price"
+  "billing_price",
+  "ot_rate"
  ],
  "fields": [
   {
@@ -40,12 +41,17 @@
    "fieldname": "billing_price",
    "fieldtype": "Currency",
    "label": "Billing Price"
+  },
+  {
+   "fieldname": "ot_rate",
+   "fieldtype": "Currency",
+   "label": "OT Rate"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-12-06 09:14:34.583650",
+ "modified": "2025-02-10 11:30:48.772060",
  "modified_by": "Administrator",
  "module": "Accruon Custom App",
  "name": "Project Employee Details",
