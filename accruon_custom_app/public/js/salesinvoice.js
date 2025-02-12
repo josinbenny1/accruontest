@@ -64,7 +64,7 @@ frappe.ui.form.on('Sales Invoice', {
 async function salesInvoiceItem(frm) {
     const items = {};
     frm.set_value('items', []);
-    frappe.dom.freeze("Please wait..");
+    // frappe.dom.freeze("Please wait..");
 
     if (frm.doc.timesheets && frm.doc.timesheets.length > 0) {
         const promises = frm.doc.timesheets.map(async (row) => {
@@ -111,7 +111,6 @@ async function salesInvoiceItem(frm) {
 
         await Promise.all(promises);
         addItemstoInvoice(frm, items);
-        console.log("2 works");
 
     } else {
         frappe.dom.unfreeze();

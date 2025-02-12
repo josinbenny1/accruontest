@@ -1,9 +1,19 @@
 frappe.ui.form.on('Timesheet', {
     refresh(frm) {
-        console.log("Code working for ts")
+        console.log("Code working for ts") 
     },
     validate: function (frm) {
-        const standard_hours = 10;
+        frappe.db.get_value("Project", frm.doc.project, "custom_standard_working_hours")
+            .then(response => {
+                if (response && response.message) {
+                    globalThis.work_hours = response.message.custom_standard_working_hours;
+                    console.log("Work Hours Set Globally:", globalThis.work_hours);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching work hours:", error);
+            });
+        let standard_hours = globalThis.work_hours
         let total_ot = 0;
         let total_holiday_ot = 0;
         let completed_requests = 0;
