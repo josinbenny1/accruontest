@@ -107,50 +107,49 @@ def get_columns(filters):
 
 
 
-
 def get_data(filters):
     timesheets = frappe.get_all(
         "Timesheet",
         filters={"docstatus": 1},
         fields=["name", "employee", "creation", "custom_total_not", "custom_total_hot", "total_hours"]
     )
-   
-    suppliers_timesheets = []
+
+    filter_conditions = get_conditions(filters)
     data = {}
-    filter = get_conditions(filters)
-    if filters:
-        employees = frappe.get_all(
-            "Employee",
-            filters=filter,
-            fields=["name"]
-        )
-        employee_names = {e.name for e in employees}
-        suppliers_timesheets = [
-            t for t in timesheets if t.employee in employee_names
-        ]
-    else:
-        suppliers_timesheets = timesheets
+    
+    employees = {e.name: e for e in frappe.get_all("Employee", filters=filter_conditions, fields=["name", "employee_name", "custom_employee_type", "custom_supplier", "custom_project"])}
+
+    suppliers_timesheets = [t for t in timesheets if t.employee in employees] if filters else timesheets
     
     if filters.get("from_date") and filters.get("to_date"):
-        
         first_day = datetime.strptime(filters.get("from_date"), "%Y-%m-%d").date()
         last_day = datetime.strptime(filters.get("to_date"), "%Y-%m-%d").date()
         no_of_days = date_diff(last_day, first_day) + 1
+        previous_day = add_days(first_day, -1)
+
+        time_logs = frappe.get_all(
+            "Timesheet Detail",
+            filters={"parent": ["in", [t.name for t in suppliers_timesheets]], "from_time": ["between", [previous_day, last_day]]},
+            fields=["parent", "hours", "from_time"]
+        )
+
+        time_log_map = {}
+        for log in time_logs:
+            time_log_map.setdefault(log["parent"], []).append(log)
+
         for timesheet in suppliers_timesheets:
+            emp = employees.get(timesheet.employee)
+            supplier = emp.custom_supplier if emp and emp.custom_employee_type == "Supplier Provided" else ""
+            supplier_det = frappe.get_doc("Supplier", supplier) if supplier else None
+            project = frappe.get_value("Project", emp.custom_project, "project_name") if emp and emp.custom_project else None
+
             if timesheet.employee not in data:
-                emp = frappe.get_doc("Employee",timesheet.employee)
-                if emp.custom_employee_type == "Supplier Provided":
-                    supplier = emp.custom_supplier
-                else:
-                    supplier = ""
-                if emp.custom_project:
-                    project = frappe.get_value("Project",emp.custom_project,"project_name")
                 data[timesheet.employee] = {
                     'employee': timesheet.employee,
-                    'supplier':supplier,
-                    'employee_name':emp.employee_name,
-                    'employee_type':emp.custom_employee_type,
-                    'project':project,
+                    'supplier': supplier,
+                    'employee_name': emp.employee_name if emp else "",
+                    'employee_type': emp.custom_employee_type if emp else "",
+                    'project': project,
                     'not': 0,
                     'hot': 0,
                     'normal_hours': 0,
@@ -158,39 +157,32 @@ def get_data(filters):
                 }
                 for day in range(1, no_of_days + 1):
                     data[timesheet.employee][str(day)] = 0
-            
-            
-            previous_day = add_days(first_day, -1)
-            time_logs = frappe.get_all(
-                "Timesheet Detail",
-                filters={
-                    "parent": timesheet.name,
-                    "from_time": ["between", [previous_day, last_day]]
-                },
-                fields=["hours", "from_time"]
-            )
-            if time_logs:
-                data[timesheet.employee]['not'] += timesheet.custom_total_not
-                data[timesheet.employee]['hot'] += timesheet.custom_total_hot
-                data[timesheet.employee]['normal_hours'] += (
-                        timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot
-                    )
-                data[timesheet.employee]['total_hours'] += timesheet.total_hours
-            
-            for log in time_logs:
+
+            data[timesheet.employee]['not'] += timesheet.custom_total_not
+            data[timesheet.employee]['hot'] += timesheet.custom_total_hot
+            data[timesheet.employee]['normal_hours'] += (timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot)
+            data[timesheet.employee]['total_hours'] += timesheet.total_hours
+
+            for log in time_log_map.get(timesheet.name, []):
                 log_date = log["from_time"].date()
                 day_number = (log_date - first_day).days + 1
                 if 1 <= day_number <= no_of_days:
                     data[timesheet.employee][str(day_number)] += log.hours
+
+                    if not filters.get("raw_data") and supplier_det and supplier_det.custom_is_ot_applicable == 0:
+                        if data[timesheet.employee][str(day_number)] >= supplier_det.custom_standard_working_hours:
+                            data[timesheet.employee][str(day_number)] = supplier_det.custom_standard_working_hours
+
     else:
-        frappe.msgprint("Please set From Date and To date")
+        frappe.msgprint("Please set From Date and To Date")
+
     return list(data.values())
 
 def get_conditions(filters):
     filter = {}
     if filters.get("supplier"):
-        filter["custom_supplier"]=filters.get("supplier")
+        filter["custom_supplier"] = filters.get("supplier")
         filter["custom_employee_type"] = "Supplier Provided"
     if filters.get("project"):
-        filter["custom_project"]=filters.get("project")
+        filter["custom_project"] = filters.get("project")
     return filter

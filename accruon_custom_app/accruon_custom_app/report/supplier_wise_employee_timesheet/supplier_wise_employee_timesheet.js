@@ -32,6 +32,12 @@ frappe.query_reports["Supplier wise Employee Timesheet"] = {
 			"label":"Summary",
 			"default":0	
 		},
+		{
+			"fieldname":"raw_data",
+			"fieldtype":"Check",
+			"label":"Raw Data",
+			"default":0	
+		}
 
 
 	],
