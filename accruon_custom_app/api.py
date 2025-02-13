@@ -75,7 +75,8 @@ def salaryslip_overtime(doc, method):
 
 def timesheet_overtime(doc, method):
     # hrs = frappe.get_doc("HR Settings")
-    standard_hours = frappe.get_value("Project", doc.parent_project, "custom_standard_working_hours")
+    std_hours = frappe.get_value("Project", doc.parent_project, "custom_standard_working_hours")
+    standard_hours = std_hours if std_hours else 0
     total_ot = 0
     total_holiday_ot = 0
 
