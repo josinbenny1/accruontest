@@ -157,11 +157,18 @@ def get_data(filters):
                 }
                 for day in range(1, no_of_days + 1):
                     data[timesheet.employee][str(day)] = 0
-
-            data[timesheet.employee]['not'] += timesheet.custom_total_not
-            data[timesheet.employee]['hot'] += timesheet.custom_total_hot
-            data[timesheet.employee]['normal_hours'] += (timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot)
-            data[timesheet.employee]['total_hours'] += timesheet.total_hours
+            if not filters.get("raw_data") and emp.custom_employee_type == "Supplier Provided":
+                data[timesheet.employee]['not'] = 0
+                data[timesheet.employee]['hot'] = 0
+                data[timesheet.employee]['normal_hours'] += (timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot)
+                data[timesheet.employee]['total_hours'] += (timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot)
+            else:
+                print("not",timesheet.custom_total_not)
+                print("not",timesheet.name)
+                data[timesheet.employee]['not'] += timesheet.custom_total_not
+                data[timesheet.employee]['hot'] += timesheet.custom_total_hot
+                data[timesheet.employee]['normal_hours'] += (timesheet.total_hours - timesheet.custom_total_not - timesheet.custom_total_hot)
+                data[timesheet.employee]['total_hours'] += timesheet.total_hours
 
             for log in time_log_map.get(timesheet.name, []):
                 log_date = log["from_time"].date()
